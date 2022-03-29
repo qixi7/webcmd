@@ -1,0 +1,80 @@
+	<button type="button" onclick={document.getElementById('middle').textContent="";}>清屏</button>
+</nobr>
+<BR>
+<div id="outer">
+	<label id="label" for="middle">${servername}_输出</label>
+	<textarea id='middle' readonly style='background-color:rgb(204,232,207)'></textarea>
+	<div id="state" style='color: #22b14c'>正在连接...</div>
+</div>
+
+<script>
+	// connect to websocket server on port 8080
+	var ws = new WebSocket('ws://${serveraddr}/');
+	var buf = "";
+	var connected = false;
+
+	var ws_onopen=function () {
+		var state = document.getElementById('state');
+		state.style.color = '#00a2e8';
+		state.textContent = "已连接";
+		connected = true;
+	};
+
+	var ws_onclose=function () {
+		var state = document.getElementById('state');
+		state.style.color = '#880015';
+		state.textContent = "已断开, 重新连接...";
+		connected = false;
+		connect();
+	};
+
+	var ws_onmessage = function (event) {
+		try {
+			buf += event.data + "\n";
+		}catch(err){
+			console.log(err);
+			buf += "##发生错误##\n";
+		}
+	};
+
+	function connect(){
+		ws = new WebSocket('ws://${serveraddr}/');
+		ws.onopen = ws_onopen;
+		ws.onclose = ws_onclose;
+		ws.onmessage = ws_onmessage;
+	}
+
+	connect();
+
+	function flush() {
+		if (buf !== ""){
+			var textarea = document.getElementById('middle');
+			textarea.textContent += buf;
+			textarea.scrollTop = textarea.scrollHeight;
+			buf = "";
+		}
+	}
+
+	setInterval("flush()", 100);
+
+	function send(arg) {
+		if (connected !== true){
+			var textarea = document.getElementById('middle');
+			textarea.textContent += "尚未连接服务器, 不能发送命令哦~";
+			return;
+		}
+		arg = arg.replace(/\:/g, " ");
+		ws.send(arg);
+	}
+
+	window.onerror = function (msg, url, line, col, error) {
+		var extra = !col ? ' ' : '\ncolnmu: ' + col;
+		error += !error ? ' ' : '\error: ' + error;
+		alert("Error: " + msg + "\nurl" + url + "\nline" + line + extra);
+		return true;
+	}
+
+</script>
+
+</body>
+</html>

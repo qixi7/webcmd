@@ -1,0 +1,6 @@
+查看服务器状态:sh ezopen.sh status
+热更服务器档:sh ezopen.sh reload
+开启服务器:sh ezopen.sh startall
+关闭服务器:sh ezopen.sh stopall
+ms_log:sh ezopen.sh log ms
+bs_log:sh ezopen.sh log bs

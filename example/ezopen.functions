@@ -1,0 +1,80 @@
+#!/bin/sh
+
+workdir=${workdir}
+export GOPATH="$workdir"
+
+cd ${workdir}
+
+# 务必提供个一个该函数, 供公共外层脚本调用, 命名保持一致
+printSelfUsage(){
+	echo "(+)status:	            see server status now."
+	echo "(+)startall:	            start all server."
+	echo "(+)stopall:	            start all server."
+	echo "(+)log (+)serverName:	    see server log."
+}
+
+getAppStatus(){
+    # shellcheck disable=SC2039
+    serverArray=(lobby ms bs)
+    echo  "-----------------------------------------------------------------------------------------------------------------"
+    echo -e "|\t服务器\t|\t状态\t|\t版本信息\t\t\t\t\t\t\t\t\t|"
+    echo  "-----------------------------------------------------------------------------------------------------------------"
+
+    for (( i = 0; i < ${#serverArray[@]}; i++ )); do
+        oneServer=${serverArray[$i]}
+        oneServerPID="${oneServer}/${oneServer}_server.pid"
+        statusTag="off"
+        if [ -f ${oneServerPID} ] && pid=`cat ${oneServerPID}` && [ -e /proc/${pid} ]; then
+            statusTag="on"
+        fi
+        gitVersion=`${oneServer}/${oneServer}_server -v | grep gitVersion`
+        buildTime=`${oneServer}/${oneServer}_server -v | grep buildTime`
+        echo "-----------------------------------------------------------------------------------------------------------------"
+        echo -e "|\t${oneServer}\t|\t${statusTag}\t|\t${gitVersion}\t|"
+        echo -e "|\t\t|\t\t|\t${buildTime}\t\t\t|"
+        echo "-----------------------------------------------------------------------------------------------------------------"
+    done
+}
+
+# 遇到未知命令时调用
+onUnknownCommand(){
+	case "$1" in
+	    -h|-?|h|help)
+	        printUsage
+	        ;;
+		status)
+			# 查看所有服务器进程状态
+            getAppStatus
+			;;
+		startall)
+		    # 开启所有服务器
+            sh run.sh startall
+            sleep 1s
+            getAppStatus
+			;;
+		stopall)
+		    # 关闭所有服务器
+            sh run.sh stopall
+            sleep 1s
+            getAppStatus
+			;;
+		log)
+		    # 查看对应服务器log
+		    if [ $# -lt 2 ]; then
+                echo "Invalid number of arg, try add -h arg to see help infomation"
+                exit 1
+		    fi
+            tail $2/logs/$2_server.log -n 100
+			;;
+      reload)
+          # 热更新策划档
+          git -C serverdata/ pull
+          httpAddr=`cat ms/httpaddr.conf`
+          curl ${httpAddr}/reload/all
+			;;
+		*)
+			echo "unknown Operation: $1"
+			printUsage
+			;;
+	esac
+}

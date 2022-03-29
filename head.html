@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<title>webcommand</title>
+	<style>
+		table {
+			table-layout: fixed;
+		}
+
+		html, body {
+			height: calc(100% - 20px);
+		}
+
+		#outer {
+			height: calc(100% - 20px - 15px);	
+		}
+
+		#middle {
+			width: calc(100% - 40px);
+			height: calc(100% - 20px - 15px - 20px);	
+			font-family: consolas, monospace;
+		}
+
+		#state {
+			font: 20px roman;
+			padding: 5px;
+			text-align： left;
+			position: absolute;
+			bottom: 10px;
+			width: calc(100% - 40px);
+			height: 20px;
+		}
+
+		button {
+			text-decoration: none;
+			background: #2f435e;
+			color: #f2f2f2;
+			padding: 5px 10px 5px 10px;
+			font-size: 14px;
+			border-radius: 3px;
+			transition: all linear 0.20s;
+		}
+
+		button :hover {
+			background: #385f9e;
+		}
+	</style>
+</head>
+<body>
+<nobr>
+	<!-- send command via a onclick -->
